@@ -1,0 +1,30 @@
+version: "3.9"
+
+services:
+  train:
+    build: .
+    command: python entrypoint/train.py
+    volumes:
+      - ./data:/app/data
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  inference:
+    build: .
+    command: python entrypoint/inference.py --all
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - train
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: pytest tests/ -v --cov=src --cov-report=term-missing
+    volumes:
+      - ./data:/app/data
+    environment:
+      - PYTHONUNBUFFERED=1
