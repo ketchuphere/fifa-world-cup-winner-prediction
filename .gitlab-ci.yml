@@ -1,0 +1,54 @@
+stages:
+  - lint
+  - test
+  - train
+  - deploy
+
+variables:
+  PYTHON_VERSION: "3.11"
+
+default:
+  image: python:3.11-slim
+  before_script:
+    - pip install --quiet -r requirements-dev.txt
+
+lint:
+  stage: lint
+  script:
+    - ruff check src/ entrypoint/ config/ tests/
+    - black --check src/ entrypoint/ config/ tests/
+  allow_failure: false
+
+test:
+  stage: test
+  script:
+    - pytest tests/ -v --cov=src --cov-report=term-missing --cov-fail-under=70
+  artifacts:
+    reports:
+      junit: report.xml
+    paths:
+      - coverage.xml
+
+train:
+  stage: train
+  script:
+    - python entrypoint/train.py
+  artifacts:
+    paths:
+      - data/04-predictions/model.pkl
+      - data/04-predictions/label_encoder.pkl
+      - data/04-predictions/feature_cols.pkl
+      - data/04-predictions/feature_importance.csv
+    expire_in: 30 days
+  only:
+    - main
+    - develop
+
+inference-smoke:
+  stage: deploy
+  needs: [train]
+  script:
+    - python entrypoint/inference.py --predict "Brazil" "Argentina" --stage final
+    - python entrypoint/inference.py --rankings
+  only:
+    - main
