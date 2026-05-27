@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Copa Oracle 2026</title>
+  <style>
+    /* ── Reset & Base ───────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:        #0d1b2a;
+      --surface:   #1b2838;
+      --surface2:  #243447;
+      --border:    #2d4a6e;
+      --accent:    #f5c518;
+      --green:     #2ecc71;
+      --orange:    #f39c12;
+      --red:       #e74c3c;
+      --blue:      #3498db;
+      --text:      #e0e6f0;
+      --muted:     #8ba3c7;
+      --radius:    12px;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    button { cursor: pointer; font-family: inherit; }
+    input, select { font-family: inherit; }
+
+    /* ── Layout ─────────────────────────────────────────────────────────── */
+    .app { display: flex; min-height: 100vh; }
+
+    /* ── Sidebar ─────────────────────────────────────────────────────────── */
+    .sidebar {
+      width: 230px;
+      background: linear-gradient(180deg, #0a1520 0%, #111e2d 100%);
+      border-right: 1px solid var(--border);
+      position: fixed; top: 0; left: 0; bottom: 0;
+      display: flex; flex-direction: column;
+      padding: 24px 0;
+      z-index: 100;
+      overflow-y: auto;
+    }
+    .sidebar-logo {
+      padding: 0 20px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar-logo h1 { font-size: 1.1rem; color: var(--accent); }
+    .sidebar-logo p  { font-size: .78rem; color: var(--muted); margin-top: 2px; }
+
+    .nav { padding: 16px 0; flex: 1; }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 11px 20px;
+      color: var(--muted);
+      font-size: .9rem;
+      transition: all .18s;
+      border-left: 3px solid transparent;
+    }
+    .nav-item:hover { color: var(--text); background: var(--surface); cursor: pointer; }
+    .nav-item.active {
+      color: var(--accent);
+      background: rgba(245,197,24,.08);
+      border-left-color: var(--accent);
+    }
+    .nav-icon { font-size: 1.1rem; }
+
+    .sidebar-footer {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border);
+      font-size: .75rem;
+      color: var(--muted);
+    }
+
+    /* ── Main ────────────────────────────────────────────────────────────── */
+    .main { margin-left: 230px; flex: 1; padding: 32px 36px; max-width: 1200px; }
+
+    /* ── Pages ───────────────────────────────────────────────────────────── */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ── Page header ─────────────────────────────────────────────────────── */
+    .page-header {
+      background: linear-gradient(135deg, var(--surface), var(--surface2));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      margin-bottom: 28px;
+    }
+    .page-header h2 { font-size: 1.7rem; color: var(--accent); margin-bottom: 4px; }
+    .page-header p  { color: var(--muted); font-size: .9rem; }
+
+    /* ── Stat cards ──────────────────────────────────────────────────────── */
+    .stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 28px; }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      text-align: center;
+    }
+    .stat-card .val { font-size: 2rem; font-weight: 700; color: var(--accent); }
+    .stat-card .lbl { font-size: .78rem; color: var(--muted); margin-top: 4px; }
+
+    /* ── Forms ───────────────────────────────────────────────────────────── */
+    .form-grid { display: grid; gap: 14px; }
+    .form-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+    .form-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+    .form-grid.cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+    .form-group label {
+      display: block;
+      font-size: .8rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+    .form-group select,
+    .form-group input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 9px 12px;
+      border-radius: 8px;
+      font-size: .88rem;
+      outline: none;
+      transition: border .18s;
+    }
+    .form-group select:focus,
+    .form-group input:focus { border-color: var(--accent); }
+
+    /* ── Buttons ─────────────────────────────────────────────────────────── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 10px 22px;
+      border-radius: 8px;
+      font-size: .9rem;
+      font-weight: 600;
+      border: none;
+      transition: all .18s;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #0d1b2a;
+    }
+    .btn-primary:hover { background: #ffd700; transform: translateY(-1px); }
+    .btn-block { width: 100%; justify-content: center; }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* ── Result cards ────────────────────────────────────────────────────── */
+    .result-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin: 20px 0; }
+    .result-card {
+      border-radius: var(--radius);
+      padding: 22px;
+      text-align: center;
+      transition: transform .2s;
+    }
+    .result-card:hover { transform: translateY(-2px); }
+    .result-card.win  { background: linear-gradient(135deg,#0d3320,#155724); border: 1px solid var(--green); }
+    .result-card.draw { background: linear-gradient(135deg,#3d2800,#5a3d00); border: 1px solid var(--orange); }
+    .result-card.lose { background: linear-gradient(135deg,#3d0d0d,#5c1a1a); border: 1px solid var(--red); }
+    .result-card .pct { font-size: 2.4rem; font-weight: 700; color: #fff; }
+    .result-card .lbl { font-size: .88rem; color: rgba(255,255,255,.7); margin-top: 4px; }
+    .result-card .winner-badge {
+      display: inline-block;
+      background: var(--accent);
+      color: #0d1b2a;
+      font-size: .72rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 20px;
+      margin-top: 6px;
+      text-transform: uppercase;
+    }
+
+    /* ── Prob bars ───────────────────────────────────────────────────────── */
+    .prob-bars { margin: 18px 0; }
+    .prob-row  { margin: 8px 0; }
+    .prob-label { display: flex; justify-content: space-between; font-size: .83rem; margin-bottom: 4px; }
+    .prob-label span:first-child { color: var(--muted); }
+    .prob-label span:last-child  { color: var(--text); font-weight: 600; }
+    .prob-track { height: 10px; background: var(--surface2); border-radius: 99px; overflow: hidden; }
+    .prob-fill  { height: 100%; border-radius: 99px; transition: width .6s ease; }
+    .fill-green  { background: linear-gradient(90deg, var(--green), #27ae60); }
+    .fill-orange { background: linear-gradient(90deg, var(--orange), #e67e22); }
+    .fill-red    { background: linear-gradient(90deg, var(--red), #c0392b); }
+
+    /* ── Table ───────────────────────────────────────────────────────────── */
+    .table-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
+    table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+    thead th {
+      background: var(--surface2);
+      color: var(--muted);
+      padding: 11px 14px;
+      text-align: left;
+      font-weight: 600;
+      font-size: .78rem;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      border-bottom: 1px solid var(--border);
+    }
+    tbody tr { border-bottom: 1px solid rgba(45,74,110,.35); transition: background .15s; }
+    tbody tr:hover { background: rgba(255,255,255,.03); }
+    tbody td { padding: 10px 14px; color: var(--text); }
+    .rank-num { color: var(--accent); font-weight: 700; }
+
+    /* ── Tags ────────────────────────────────────────────────────────────── */
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: .74rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .tag-buy  { background: rgba(46,204,113,.15); color: var(--green); border: 1px solid var(--green); }
+    .tag-sell { background: rgba(231,76,60,.15);  color: var(--red);   border: 1px solid var(--red); }
+
+    /* ── Card / section ──────────────────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      margin-bottom: 20px;
+    }
+    .section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ── VS divider ──────────────────────────────────────────────────────── */
+    .vs-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 14px;
+      align-items: end;
+      margin-bottom: 14px;
+    }
+    .vs-label {
+      text-align: center;
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--accent);
+      padding-bottom: 9px;
+    }
+
+    /* ── Loading spinner ─────────────────────────────────────────────────── */
+    .spinner {
+      display: inline-block;
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,.2);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Toast ───────────────────────────────────────────────────────────── */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 20px;
+      font-size: .88rem;
+      color: var(--text);
+      z-index: 9999;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: all .3s;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    /* ── Champion banner ─────────────────────────────────────────────────── */
+    .champion-banner {
+      background: linear-gradient(135deg, #2d1f00, #7d4e00);
+      border: 2px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 28px;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .champion-banner .trophy { font-size: 3rem; }
+    .champion-banner .name   { font-size: 2rem; font-weight: 800; color: var(--accent); }
+    .champion-banner .prob   { font-size: 1.1rem; color: #ffd87e; margin-top: 4px; }
+
+    /* ── Home page stats ─────────────────────────────────────────────────── */
+    .hero {
+      background: linear-gradient(135deg, var(--surface), var(--surface2));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 36px 36px 28px;
+      margin-bottom: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '⚽';
+      position: absolute;
+      right: 32px; top: 20px;
+      font-size: 5rem;
+      opacity: .07;
+    }
+    .hero h1 { font-size: 2rem; color: var(--accent); margin-bottom: 8px; }
+    .hero p  { color: var(--muted); max-width: 520px; }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      margin-top: 24px;
+    }
+    .feature-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      cursor: pointer;
+      transition: all .18s;
+    }
+    .feature-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+    .feature-card .icon { font-size: 1.6rem; margin-bottom: 8px; }
+    .feature-card h3 { font-size: .95rem; color: var(--text); margin-bottom: 4px; }
+    .feature-card p  { font-size: .8rem; color: var(--muted); }
+
+    /* ── Responsive ──────────────────────────────────────────────────────── */
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; padding: 20px 16px; }
+      .stat-grid { grid-template-columns: 1fr 1fr; }
+      .result-grid { grid-template-columns: 1fr; }
+      .form-grid.cols-3, .form-grid.cols-4 { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ── Sidebar ──────────────────────────────────────────────────────────── -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <h1>⚽ Copa Oracle</h1>
+      <p>World Cup 2026 Predictor</p>
+    </div>
+    <div class="nav">
+      <div class="nav-item active" onclick="showPage('home')">
+        <span class="nav-icon">🏠</span> Home
+      </div>
+      <div class="nav-item" onclick="showPage('predictor')">
+        <span class="nav-icon">🎯</span> Match Predictor
+      </div>
+      <div class="nav-item" onclick="showPage('rankings')">
+        <span class="nav-icon">🏆</span> Team Rankings
+      </div>
+      <div class="nav-item" onclick="showPage('simulator')">
+        <span class="nav-icon">🎲</span> Bracket Simulator
+      </div>
+      <div class="nav-item" onclick="showPage('mispricings')">
+        <span class="nav-icon">📊</span> Mispricings
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <div>Model: LightGBM · 32 features</div>
+      <div>Data: 1930–2022</div>
+      <div style="margin-top:8px"><a href="/docs" target="_blank">API Docs ↗</a></div>
+    </div>
+  </nav>
+
+  <!-- ── Main ─────────────────────────────────────────────────────────────── -->
+  <main class="main">
+
+    <!-- HOME ──────────────────────────────────────────────────────────────── -->
+    <div id="page-home" class="page active">
+      <div class="hero">
+        <h1>Copa Oracle 2026</h1>
+        <p>FIFA World Cup 2026 ML Prediction Engine — powered by LightGBM trained on 964 matches from 1930–2022 with 32 engineered features.</p>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card"><div class="val">964</div><div class="lbl">Training Matches</div></div>
+        <div class="stat-card"><div class="val">32</div><div class="lbl">Features</div></div>
+        <div class="stat-card"><div class="val">59%</div><div class="lbl">CV Accuracy</div></div>
+        <div class="stat-card"><div class="val">10K</div><div class="lbl">Monte Carlo Sims</div></div>
+      </div>
+
+      <div class="feature-grid">
+        <div class="feature-card" onclick="showPage('predictor')">
+          <div class="icon">🎯</div>
+          <h3>Match Predictor</h3>
+          <p>Head-to-head win probabilities with H2H history and team comparison.</p>
+        </div>
+        <div class="feature-card" onclick="showPage('rankings')">
+          <div class="icon">🏆</div>
+          <h3>Team Rankings</h3>
+          <p>Copa Oracle Score leaderboard — composite of Elo, Form, Attack & Defence.</p>
+        </div>
+        <div class="feature-card" onclick="showPage('simulator')">
+          <div class="icon">🎲</div>
+          <h3>Bracket Simulator</h3>
+          <p>Monte Carlo simulation across 32 teams to predict the 2026 champion.</p>
+        </div>
+        <div class="feature-card" onclick="showPage('mispricings')">
+          <div class="icon">📊</div>
+          <h3>Market Mispricings</h3>
+          <p>Compare model probabilities against betting market odds to find edges.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- MATCH PREDICTOR ───────────────────────────────────────────────────── -->
+    <div id="page-predictor" class="page">
+      <div class="page-header">
+        <h2>🎯 Match Predictor</h2>
+        <p>Select two teams and a stage to get win probabilities.</p>
+      </div>
+
+      <div class="card">
+        <div class="vs-row">
+          <div class="form-group">
+            <label>🏠 Home Team</label>
+            <select id="pred-home"></select>
+          </div>
+          <div class="vs-label">VS</div>
+          <div class="form-group">
+            <label>✈️ Away Team</label>
+            <select id="pred-away"></select>
+          </div>
+        </div>
+        <div class="form-grid cols-2" style="margin-bottom:16px">
+          <div class="form-group">
+            <label>🏟️ Match Stage</label>
+            <select id="pred-stage">
+              <option value="group">Group Stage</option>
+              <option value="round_of_16">Round of 16</option>
+              <option value="quarter_final">Quarter Final</option>
+              <option value="semi_final">Semi Final</option>
+              <option value="third_place">Third Place</option>
+              <option value="final">Final</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-block" onclick="runPrediction()" id="pred-btn">
+          ⚡ Predict Match
+        </button>
+      </div>
+
+      <div id="pred-result" style="display:none">
+        <div class="result-grid" id="pred-cards"></div>
+        <div class="card">
+          <div class="section-title">📊 Win Probabilities</div>
+          <div class="prob-bars" id="pred-bars"></div>
+        </div>
+        <div class="card">
+          <div class="section-title">📋 Team Comparison</div>
+          <div id="pred-comparison"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RANKINGS ──────────────────────────────────────────────────────────── -->
+    <div id="page-rankings" class="page">
+      <div class="page-header">
+        <h2>🏆 Team Rankings</h2>
+        <p>Copa Oracle Score = Elo (40%) + Form (25%) + Attack (20%) + Defence (15%)</p>
+      </div>
+
+      <div class="card">
+        <div class="form-grid cols-3" style="margin-bottom:16px">
+          <div class="form-group">
+            <label>Filter Confederation</label>
+            <select id="rank-conf" onchange="loadRankings()">
+              <option value="">All Confederations</option>
+              <option value="UEFA">UEFA</option>
+              <option value="CONMEBOL">CONMEBOL</option>
+              <option value="CONCACAF">CONCACAF</option>
+              <option value="CAF">CAF</option>
+              <option value="AFC">AFC</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Sort By</label>
+            <select id="rank-sort" onchange="loadRankings()">
+              <option value="copa_score">Copa Score</option>
+              <option value="elo">Elo Rating</option>
+              <option value="form">Form</option>
+              <option value="gpg">Goals / Game</option>
+              <option value="gcpg">Concede / Game</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Show Top</label>
+            <select id="rank-topn" onchange="loadRankings()">
+              <option value="10">Top 10</option>
+              <option value="20" selected>Top 20</option>
+              <option value="32">Top 32</option>
+              <option value="50">Top 50</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th><th>Team</th><th>Copa Score</th>
+              <th>Elo</th><th>Form</th><th>Goals/G</th>
+              <th>Concede/G</th><th>Confederation</th><th>WC Exp</th>
+            </tr>
+          </thead>
+          <tbody id="rank-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SIMULATOR ─────────────────────────────────────────────────────────── -->
+    <div id="page-simulator" class="page">
+      <div class="page-header">
+        <h2>🎲 Bracket Simulator</h2>
+        <p>Monte Carlo simulation — run thousands of tournaments to estimate each team's win probability.</p>
+      </div>
+
+      <div class="card">
+        <div class="form-grid cols-3" style="margin-bottom:16px">
+          <div class="form-group">
+            <label>Simulations</label>
+            <select id="sim-nsims">
+              <option value="1000">1,000</option>
+              <option value="2000">2,000</option>
+              <option value="5000" selected>5,000</option>
+              <option value="10000">10,000</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Host Nation</label>
+            <select id="sim-host">
+              <option value="United States">United States</option>
+              <option value="Mexico">Mexico</option>
+              <option value="Canada">Canada</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Random Seed</label>
+            <input type="number" id="sim-seed" value="42" min="0" max="9999" />
+          </div>
+        </div>
+        <button class="btn btn-primary btn-block" onclick="runSimulation()" id="sim-btn">
+          🚀 Run Simulation
+        </button>
+      </div>
+
+      <div id="sim-result" style="display:none">
+        <div class="champion-banner" id="sim-champion"></div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>#</th><th>Team</th><th>Win Probability</th><th>Copa Oracle Score</th><th>Probability Bar</th></tr>
+            </thead>
+            <tbody id="sim-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- MISPRICINGS ───────────────────────────────────────────────────────── -->
+    <div id="page-mispricings" class="page">
+      <div class="page-header">
+        <h2>📊 Market Mispricings</h2>
+        <p>Enter market odds to find where the model disagrees with the market.</p>
+      </div>
+
+      <div class="card">
+        <div class="section-title">⚙️ Settings</div>
+        <div class="form-grid cols-2">
+          <div class="form-group">
+            <label>Minimum Edge to Flag (%)</label>
+            <input type="number" id="misp-threshold" value="8" min="1" max="50" />
+          </div>
+        </div>
+      </div>
+
+      <div id="misp-matches">
+        <div class="card" id="misp-match-0">
+          <div class="section-title">Match 1</div>
+          <div class="form-grid cols-4" style="margin-bottom:10px">
+            <div class="form-group">
+              <label>Home Team</label>
+              <select class="misp-home"></select>
+            </div>
+            <div class="form-group">
+              <label>Away Team</label>
+              <select class="misp-away"></select>
+            </div>
+            <div class="form-group">
+              <label>Stage</label>
+              <select class="misp-stage">
+                <option value="group">Group</option>
+                <option value="round_of_16">Round of 16</option>
+                <option value="quarter_final">Quarter Final</option>
+                <option value="semi_final">Semi Final</option>
+                <option value="final">Final</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-grid cols-3">
+            <div class="form-group">
+              <label>Market Home %</label>
+              <input type="number" class="misp-mh" value="40" min="1" max="98" step="0.5" />
+            </div>
+            <div class="form-group">
+              <label>Market Draw %</label>
+              <input type="number" class="misp-md" value="25" min="1" max="98" step="0.5" />
+            </div>
+            <div class="form-group">
+              <label>Market Away %</label>
+              <input type="number" class="misp-ma" value="35" min="1" max="98" step="0.5" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-bottom:20px">
+        <button class="btn btn-primary" onclick="addMatch()">➕ Add Match</button>
+        <button class="btn btn-primary" onclick="analyseMispricings()" id="misp-btn">🔍 Analyse</button>
+      </div>
+
+      <div id="misp-result" style="display:none">
+        <div class="card" id="misp-summary"></div>
+        <div class="table-wrap" id="misp-table-wrap" style="display:none">
+          <table>
+            <thead><tr><th>Match</th><th>Outcome</th><th>Model %</th><th>Market %</th><th>Edge</th><th>Signal</th></tr></thead>
+            <tbody id="misp-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── State ────────────────────────────────────────────────────────────────────
+const API = '';  // same origin
+let TEAMS = [];
+let mispMatchCount = 1;
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+async function init() {
+  try {
+    const res  = await fetch(`${API}/api/teams`);
+    const data = await res.json();
+    TEAMS = data.teams;
+
+    // Populate selects
+    populateSelect('pred-home', TEAMS, 'Brazil');
+    populateSelect('pred-away', TEAMS, 'Argentina');
+    populateSelect('sim-host',  ['United States','Mexico','Canada'], 'United States', false);
+    populateMispSelects(document.getElementById('misp-match-0'));
+
+    loadRankings();
+  } catch(e) {
+    showToast('⚠️ Could not connect to API. Make sure the server is running.');
+  }
+}
+
+function populateSelect(id, teams, defaultVal, clear=true) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (clear) el.innerHTML = '';
+  teams.forEach(t => {
+    const o = document.createElement('option');
+    o.value = t; o.textContent = t;
+    if (t === defaultVal) o.selected = true;
+    el.appendChild(o);
+  });
+}
+
+function populateMispSelects(container) {
+  const homeEl = container.querySelector('.misp-home');
+  const awayEl = container.querySelector('.misp-away');
+  homeEl.innerHTML = '';
+  awayEl.innerHTML = '';
+  TEAMS.forEach(t => {
+    homeEl.appendChild(new Option(t, t));
+    awayEl.appendChild(new Option(t, t));
+  });
+  if (TEAMS.includes('Brazil'))    homeEl.value = 'Brazil';
+  if (TEAMS.includes('Argentina')) awayEl.value = 'Argentina';
+}
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(`page-${id}`).classList.add('active');
+  const idx = ['home','predictor','rankings','simulator','mispricings'].indexOf(id);
+  document.querySelectorAll('.nav-item')[idx]?.classList.add('active');
+  if (id === 'rankings') loadRankings();
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+function showToast(msg, duration=3000) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), duration);
+}
+
+// ── Match Predictor ────────────────────────────────────────────────────────────
+async function runPrediction() {
+  const home  = document.getElementById('pred-home').value;
+  const away  = document.getElementById('pred-away').value;
+  const stage = document.getElementById('pred-stage').value;
+  const btn   = document.getElementById('pred-btn');
+
+  if (home === away) { showToast('⚠️ Please select two different teams.'); return; }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Predicting...';
+
+  try {
+    const res  = await fetch(`${API}/api/predict`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({home, away, stage, host_home:0, host_away:0})
+    });
+    const data = await res.json();
+    renderPrediction(data, home, away);
+  } catch(e) {
+    showToast('❌ Prediction failed. Is the API running?');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '⚡ Predict Match';
+  }
+}
+
+function renderPrediction(data, home, away) {
+  const probs = data.probs;
+  const ph = probs['H'] || 0, pd = probs['D'] || 0, pa = probs['A'] || 0;
+  const pred = data.predicted;
+
+  // Cards
+  const cardsEl = document.getElementById('pred-cards');
+  cardsEl.innerHTML = [
+    {cls: pred==='H'?'win':'lose', icon: pred==='H'?'🏆':'❌', pct: ph, lbl: home,  outcome:'H'},
+    {cls: pred==='D'?'win':'draw', icon: pred==='D'?'🤝':'➖', pct: pd, lbl: 'Draw', outcome:'D'},
+    {cls: pred==='A'?'win':'lose', icon: pred==='A'?'🏆':'❌', pct: pa, lbl: away,  outcome:'A'},
+  ].map(c => `
+    <div class="result-card ${c.cls}">
+      <div style="font-size:1.8rem">${c.icon}</div>
+      <div class="pct">${c.pct.toFixed(1)}%</div>
+      <div class="lbl">${c.lbl}</div>
+      ${c.outcome === pred ? `<span class="winner-badge">Predicted</span>` : ''}
+    </div>
+  `).join('');
+
+  // Prob bars
+  document.getElementById('pred-bars').innerHTML = [
+    {lbl: home,  pct: ph, cls: 'fill-green'},
+    {lbl: 'Draw',pct: pd, cls: 'fill-orange'},
+    {lbl: away,  pct: pa, cls: 'fill-red'},
+  ].map(b => `
+    <div class="prob-row">
+      <div class="prob-label"><span>${b.lbl}</span><span>${b.pct.toFixed(1)}%</span></div>
+      <div class="prob-track"><div class="prob-fill ${b.cls}" style="width:${b.pct}%"></div></div>
+    </div>
+  `).join('');
+
+  // Comparison table
+  document.getElementById('pred-comparison').innerHTML = `
+    <table style="width:100%;font-size:.85rem">
+      <thead><tr>
+        <th style="padding:8px;color:var(--muted);text-align:left">Stat</th>
+        <th style="padding:8px;color:var(--accent);text-align:center">${home}</th>
+        <th style="padding:8px;color:var(--muted);text-align:center">Away</th>
+        <th style="padding:8px;color:#e74c3c;text-align:center">${away}</th>
+      </tr></thead>
+      <tbody>
+        ${[
+          ['Elo Rating',  data.home_elo?.toFixed(0),   '→',  data.away_elo?.toFixed(0)],
+          ['Form Score',  data.home_form?.toFixed(2),  '→',  data.away_form?.toFixed(2)],
+        ].map(([s,h,,a]) => `<tr>
+          <td style="padding:8px;color:var(--muted)">${s}</td>
+          <td style="padding:8px;text-align:center">${h ?? '—'}</td>
+          <td style="padding:8px;text-align:center;color:var(--muted)">→</td>
+          <td style="padding:8px;text-align:center">${a ?? '—'}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+
+  document.getElementById('pred-result').style.display = 'block';
+  document.getElementById('pred-result').scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+// ── Rankings ───────────────────────────────────────────────────────────────────
+async function loadRankings() {
+  const conf   = document.getElementById('rank-conf')?.value || '';
+  const sort   = document.getElementById('rank-sort')?.value || 'copa_score';
+  const topn   = document.getElementById('rank-topn')?.value || '20';
+  const url    = `${API}/api/rankings?top_n=${topn}&sort_by=${sort}${conf?`&confederation=${conf}`:''}`;
+  const tbody  = document.getElementById('rank-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--muted)"><span class="spinner"></span> Loading...</td></tr>';
+  try {
+    const res  = await fetch(url);
+    const data = await res.json();
+    tbody.innerHTML = data.rankings.map((r,i) => `
+      <tr>
+        <td class="rank-num">${i+1}</td>
+        <td><strong>${r.team}</strong></td>
+        <td><strong style="color:var(--green)">${r.copa_score?.toFixed(1)}</strong></td>
+        <td>${r.elo?.toFixed(0)}</td>
+        <td>${r.form?.toFixed(2)}</td>
+        <td>${r.gpg?.toFixed(2)}</td>
+        <td>${r.gcpg?.toFixed(2)}</td>
+        <td><span style="color:var(--muted)">${r.confederation}</span></td>
+        <td>${r.wc_exp}</td>
+      </tr>
+    `).join('');
+  } catch(e) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--red)">Failed to load rankings.</td></tr>';
+  }
+}
+
+// ── Simulator ──────────────────────────────────────────────────────────────────
+async function runSimulation() {
+  const nSims = parseInt(document.getElementById('sim-nsims').value);
+  const host  = document.getElementById('sim-host').value;
+  const seed  = parseInt(document.getElementById('sim-seed').value);
+  const btn   = document.getElementById('sim-btn');
+
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spinner"></span> Running ${nSims.toLocaleString()} simulations...`;
+
+  try {
+    const res  = await fetch(`${API}/api/simulate`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ teams: TEAMS.slice(0,32), host, n_sims: nSims, seed })
+    });
+    const data = await res.json();
+    renderSimulation(data);
+  } catch(e) {
+    showToast('❌ Simulation failed. Is the API running?');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '🚀 Run Simulation';
+  }
+}
+
+function renderSimulation(data) {
+  // Champion banner
+  document.getElementById('sim-champion').innerHTML = `
+    <div class="trophy">🏆</div>
+    <div class="name">${data.champion}</div>
+    <div class="prob">Predicted Champion · Win Probability: <strong>${data.win_prob.toFixed(1)}%</strong></div>
+  `;
+
+  // Table
+  const maxProb = data.results[0]?.win_prob || 1;
+  document.getElementById('sim-tbody').innerHTML = data.results.map((r,i) => `
+    <tr>
+      <td class="rank-num">${i+1}</td>
+      <td><strong>${r.team}</strong></td>
+      <td><strong style="color:var(--${i<3?'accent':'text'})">${r.win_prob.toFixed(1)}%</strong></td>
+      <td>${r.copa_score?.toFixed(1)}</td>
+      <td>
+        <div style="background:var(--surface2);border-radius:4px;height:8px;width:180px;overflow:hidden">
+          <div style="background:var(--accent);height:100%;width:${(r.win_prob/maxProb*100).toFixed(1)}%;border-radius:4px"></div>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+
+  document.getElementById('sim-result').style.display = 'block';
+  document.getElementById('sim-result').scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+// ── Mispricings ────────────────────────────────────────────────────────────────
+function addMatch() {
+  mispMatchCount++;
+  const container = document.getElementById('misp-matches');
+  const div = document.createElement('div');
+  div.className = 'card';
+  div.id = `misp-match-${mispMatchCount-1}`;
+  div.innerHTML = `
+    <div class="section-title">Match ${mispMatchCount}</div>
+    <div class="form-grid cols-4" style="margin-bottom:10px">
+      <div class="form-group"><label>Home Team</label><select class="misp-home"></select></div>
+      <div class="form-group"><label>Away Team</label><select class="misp-away"></select></div>
+      <div class="form-group"><label>Stage</label>
+        <select class="misp-stage">
+          <option value="group">Group</option>
+          <option value="round_of_16">Round of 16</option>
+          <option value="quarter_final">Quarter Final</option>
+          <option value="semi_final">Semi Final</option>
+          <option value="final">Final</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-grid cols-3">
+      <div class="form-group"><label>Market Home %</label><input type="number" class="misp-mh" value="40" min="1" max="98" step="0.5" /></div>
+      <div class="form-group"><label>Market Draw %</label><input type="number" class="misp-md" value="25" min="1" max="98" step="0.5" /></div>
+      <div class="form-group"><label>Market Away %</label><input type="number" class="misp-ma" value="35" min="1" max="98" step="0.5" /></div>
+    </div>`;
+  container.appendChild(div);
+  populateMispSelects(div);
+}
+
+async function analyseMispricings() {
+  const threshold = parseFloat(document.getElementById('misp-threshold').value) || 8;
+  const cards = document.querySelectorAll('#misp-matches .card');
+  const btn   = document.getElementById('misp-btn');
+
+  const matchups = Array.from(cards).map(card => ({
+    home:        card.querySelector('.misp-home')?.value,
+    away:        card.querySelector('.misp-away')?.value,
+    stage:       card.querySelector('.misp-stage')?.value,
+    market_home: parseFloat(card.querySelector('.misp-mh')?.value) || 33,
+    market_draw: parseFloat(card.querySelector('.misp-md')?.value) || 33,
+    market_away: parseFloat(card.querySelector('.misp-ma')?.value) || 34,
+  })).filter(m => m.home && m.away && m.home !== m.away);
+
+  if (!matchups.length) { showToast('⚠️ Please enter at least one valid match.'); return; }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Analysing...';
+
+  try {
+    const res  = await fetch(`${API}/api/mispricings`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ matchups, threshold })
+    });
+    const data = await res.json();
+    renderMispricings(data);
+  } catch(e) {
+    showToast('❌ Analysis failed. Is the API running?');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '🔍 Analyse';
+  }
+}
+
+function renderMispricings(data) {
+  const summary = document.getElementById('misp-summary');
+  if (data.count === 0) {
+    summary.innerHTML = `<div style="color:var(--green);font-size:1.1rem">✅ No mispricings found above ${data.threshold}% threshold.</div>`;
+    document.getElementById('misp-table-wrap').style.display = 'none';
+  } else {
+    const buys  = data.mispricings.filter(m => m.signal === 'BUY').length;
+    const sells = data.mispricings.filter(m => m.signal === 'SELL').length;
+    summary.innerHTML = `
+      <div style="display:flex;gap:24px;align-items:center">
+        <div><span style="font-size:1.5rem;font-weight:700;color:var(--accent)">${data.count}</span>
+             <span style="color:var(--muted);margin-left:6px">Mispricings Found</span></div>
+        <div style="color:var(--green)">🟢 ${buys} BUY</div>
+        <div style="color:var(--red)">🔴 ${sells} SELL</div>
+      </div>`;
+
+    document.getElementById('misp-tbody').innerHTML = data.mispricings.map(m => `
+      <tr>
+        <td>${m.match}</td>
+        <td><strong>${m.outcome}</strong></td>
+        <td>${m['model_%']?.toFixed(1)}%</td>
+        <td>${m['market_%']?.toFixed(1)}%</td>
+        <td style="color:${m.edge>0?'var(--green)':'var(--red)'}">
+          <strong>${m.edge > 0 ? '+' : ''}${m.edge?.toFixed(1)}%</strong>
+        </td>
+        <td><span class="tag tag-${m.signal.toLowerCase()}">${m.signal}</span></td>
+      </tr>
+    `).join('');
+    document.getElementById('misp-table-wrap').style.display = 'block';
+  }
+  document.getElementById('misp-result').style.display = 'block';
+}
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
