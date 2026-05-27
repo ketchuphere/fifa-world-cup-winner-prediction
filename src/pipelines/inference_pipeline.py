@@ -17,11 +17,20 @@ import pandas as pd
 
 warnings.filterwarnings("ignore")
 
-from .feature_eng_pipeline import (
-    FEATURE_COLS, ELO_START, ELO_K, DECAY, FORM_WINDOW,
-    CONFEDERATION, CONF_STRENGTH, STAGE_ORDER,
-    get_result, conf_strength, confederation,
-)
+try:
+    from .feature_eng_pipeline import (
+        FEATURE_COLS, ELO_START, ELO_K, DECAY, FORM_WINDOW,
+        CONFEDERATION, CONF_STRENGTH, STAGE_ORDER,
+        get_result, conf_strength, confederation,
+    )
+except ImportError:
+    import sys, os
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+    from src.pipelines.feature_eng_pipeline import (
+        FEATURE_COLS, ELO_START, ELO_K, DECAY, FORM_WINDOW,
+        CONFEDERATION, CONF_STRENGTH, STAGE_ORDER,
+        get_result, conf_strength, confederation,
+    )
 
 
 #Copa Oracle Score
@@ -40,7 +49,7 @@ def copa_oracle_score(elo: float, form: float, gpg: float, gcpg: float,
     elo_n    = norm(elo,   elo_min,   elo_max)
     form_n   = norm(form,  form_min,  form_max)
     attack_n = norm(gpg,   gpg_min,   gpg_max)
-    def_n    = 1.0 - norm(gcpg, gcpg_min, gcpg_max)  # lower concede = better
+    def_n    = 1.0 - norm(gcpg, gcpg_min, gcpg_max)  #lower concede = better
 
     score = (
         elo_n    * weights.get("elo_weight",    0.40) +
@@ -339,28 +348,24 @@ def print_prediction(res: dict) -> None:
         "A": f"{away} wins",
     }[pred]
 
-    sep = "═" * 54
-    print(f"\n{sep}")
+
     print(f"  {home}  vs  {away}  [{res['stage'].replace('_',' ').title()}]")
-    print(sep)
     print(f"  Prediction  →  {label}")
     print()
     print(f"  {'Outcome':<24}  {'Probability':>11}  Bar")
-    print(f"  {'─'*24}  {'─'*11}  {'─'*20}")
     for outcome, lbl in [("H", home), ("D", "Draw"), ("A", away)]:
         p   = probs.get(outcome, 0)
-        bar = "█" * int(p / 5)
+        bar = "/" * int(p / 5)
         print(f"  {lbl:<24}  {p:>10.1f}%  {bar}")
     print()
     print(f"  Elo  →  {home}: {res['home_elo']:.0f}  |  {away}: {res['away_elo']:.0f}")
     print(f"  Form →  {home}: {res['home_form']:.2f}  |  {away}: {res['away_form']:.2f}")
-    print(sep)
 
 
 def run(predictions_dir: Path, features_path: Path, cfg: dict,
         matchups: Optional[list] = None) -> Predictor:
 
-    print("Inference Pipeline")
+    print("── Inference Pipeline ──")
     predictor = Predictor(predictions_dir, features_path, cfg)
     print(f"  Loaded model | {len(predictor.profiles)} teams profiled")
 
@@ -370,5 +375,5 @@ def run(predictions_dir: Path, features_path: Path, cfg: dict,
             res = predictor.predict(*m)
             print_prediction(res)
 
-    print("Inference Pipeline completed.\n")
+    print("Done \n")
     return predictor

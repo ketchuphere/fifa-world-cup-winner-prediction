@@ -34,7 +34,12 @@ except ImportError:
     LGB_AVAILABLE = False
 
 from sklearn.ensemble import GradientBoostingClassifier
-from .feature_eng_pipeline import FEATURE_COLS
+try:
+    from .feature_eng_pipeline import FEATURE_COLS
+except ImportError:
+    import sys, os
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+    from src.pipelines.feature_eng_pipeline import FEATURE_COLS
 
 
 #Model factory
@@ -84,7 +89,7 @@ def _evaluate(name: str, model, X: pd.DataFrame, y: pd.Series,
     acc  = accuracy_score(y, y_pred)
     f1   = f1_score(y, y_pred, average="macro")
     ll   = log_loss(y, y_proba)
-    print(f"\n  {name} ")
+    print(f"\n  ── {name} ──────────────────────────────────")
     print(f"     Accuracy  : {acc:.4f}")
     print(f"     Macro-F1  : {f1:.4f}")
     print(f"     Log-loss  : {ll:.4f}")
@@ -96,7 +101,7 @@ def _evaluate(name: str, model, X: pd.DataFrame, y: pd.Series,
 #Main pipeline
 
 def run(features_path: Path, predictions_dir: Path, cfg: dict) -> dict:
-    print("Training Pipeline")
+    print("── Training Pipeline ─────────────────────────────────────")
 
     #Load
     df = pd.read_csv(features_path)
@@ -142,11 +147,11 @@ def run(features_path: Path, predictions_dir: Path, cfg: dict) -> dict:
     cal_method = cfg.get("model", {}).get("calibration_method", "isotonic")
     print(f"\n  Calibrating with {cal_method} regression on 2018 val set...")
     try:
-        # sklearn >= 1.2: use cv="prefit"
+        #sklearn >= 1.2: use cv="prefit"
         calibrated = CalibratedClassifierCV(base_model, method=cal_method, cv="prefit")
         calibrated.fit(X_val, y_val)
     except Exception:
-        # Fallback: refit calibrated model with cross-validation
+        #Fallback: refit calibrated model with cross-validation
         calibrated = CalibratedClassifierCV(base_model, method=cal_method, cv=5)
         calibrated.fit(X_train, y_train)
 
@@ -184,4 +189,6 @@ def run(features_path: Path, predictions_dir: Path, cfg: dict) -> dict:
         "val_metrics":  val_metrics,
         "test_metrics": test_metrics,
         "cv_accuracy":  float(cv_results["test_accuracy"].mean()),
+        "cv_f1":        float(cv_results["test_f1_macro"].mean()),
+        "cv_log_loss":  float(-cv_results["test_neg_log_loss"].mean()),
     }
