@@ -1,0 +1,77 @@
+project:
+  name: Copa Oracle 2026
+  version: 2.0.0
+  description: FIFA World Cup 2026 match prediction engine
+
+paths:
+  raw:           data/01-raw
+  preprocessed:  data/02-preprocessed
+  features:      data/03-features
+  predictions:   data/04-predictions
+  model_output:  data/04-predictions/model.pkl
+  scaler_output: data/04-predictions/scaler.pkl
+
+raw_files:
+  wc_matches:   WorldCupMatches.csv
+  wc_cups:      WorldCups.csv
+  wc_players:   WorldCupPlayers.csv
+  wc_2018:      2018_worldcup_v3.csv
+  wc_2022:      FifaWorldcup2022.csv
+
+preprocessing:
+  min_year: 1930
+  test_year: 2022       #temporal holdout
+  val_year:  2018       # validation set
+
+elo:
+  start_rating: 1500
+  k_group:      32
+  k_knockout:   48
+  k_final:      64
+  decay_factor: 0.95    #inter-tournament decay toward mean
+
+features:
+  form_window: 5
+  min_matches_for_stats: 1
+
+model:
+  algorithm: lightgbm
+  n_estimators: 500
+  learning_rate: 0.03
+  max_depth: 5
+  num_leaves: 31
+  min_child_samples: 10
+  subsample: 0.8
+  colsample_bytree: 0.8
+  reg_alpha: 0.1
+  reg_lambda: 1.0
+  class_weight: balanced
+  random_state: 42
+  cv_folds: 10
+  calibration_method: isotonic   # isotonic | sigmoid
+
+copa_oracle_score:
+  elo_weight:    0.40
+  form_weight:   0.25
+  attack_weight: 0.20
+  defense_weight: 0.15
+
+monte_carlo:
+  n_simulations: 10000
+  random_seed: 42
+
+stage_order:
+  group:         1
+  round_of_16:   2
+  quarter_final: 3
+  semi_final:    4
+  third_place:   5
+  final:         6
+
+confederation_strength:
+  UEFA:     0.72
+  CONMEBOL: 0.68
+  CONCACAF: 0.45
+  CAF:      0.42
+  AFC:      0.40
+  OFC:      0.30
