@@ -41,7 +41,8 @@ def main():
 
     features_file = features_dir / "wc_features.csv"
 
-    print("Copa Oracle 2026 — Training Run")
+    print("          Copa Oracle 2026 — Training Run             ")
+    
 
     #Stage 1 + 2: Feature Engineering
     if args.skip_features and features_file.exists():
@@ -54,10 +55,14 @@ def main():
 
     print("                 Final Metrics Summary                ")
     print(f"  Val  2018 accuracy : {metrics['val_metrics']['accuracy']:.4f}")
+    print(f"  Val  2018 log-loss : {metrics['val_metrics']['log_loss']:.4f}")
     print(f"  Test 2022 accuracy : {metrics['test_metrics']['accuracy']:.4f}")
     print(f"  Test 2022 log-loss : {metrics['test_metrics']['log_loss']:.4f}")
     print(f"  CV   accuracy      : {metrics['cv_accuracy']:.4f}")
-    print(f"  CV   macro-F1      : {metrics['cv_f1']:.4f} \n")
+    print(f"  CV   macro-F1      : {metrics['cv_f1']:.4f}")
+    print(f"  CV   log-loss      : {metrics['cv_log_loss']:.4f}")
+    print(" \n")
+
 
 if __name__ == "__main__":
     main()
